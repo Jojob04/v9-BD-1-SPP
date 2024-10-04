@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/WindResourceAssessmentProjectDOE_1.js"></script>
+        <script src="data/SlopeSuitabilityBurgosDasol1SPP_2.js"></script>
+        <script src="data/SlopeSuitabilityNorthPossibleExpansion_3.js"></script>
+        <script src="data/SlopeSuitabilityWestPossibleExpansion_4.js"></script>
+        <script src="data/SlopeSuitabilityEastExpansionEndorsedbyAgent_5.js"></script>
+        <script src="data/NorthPossibleExpansion_6.js"></script>
+        <script src="data/WestPossibleExpansion_7.js"></script>
+        <script src="data/EastPossibleExpansionEndorsedbyAgentkmz_8.js"></script>
+        <script src="data/BurgosDasol1SPPLotStatus_9.js"></script>
+        <script src="data/AD_Pangasinan_10.js"></script>
+        <script src="data/FL_Pangasinan_11.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[15.980760615103048,119.81428507254482],[16.055219546665267,119.89595832642347]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_WindResourceAssessmentProjectDOE_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="ID"colspan="2"><strong>ID</strong><br />' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_WindResourceAssessmentProjectDOE_1_0() {
+            return {
+                pane: 'pane_WindResourceAssessmentProjectDOE_1',
+                opacity: 1,
+                color: 'rgba(255,1,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,51,0,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_WindResourceAssessmentProjectDOE_1');
+        map.getPane('pane_WindResourceAssessmentProjectDOE_1').style.zIndex = 401;
+        map.getPane('pane_WindResourceAssessmentProjectDOE_1').style['mix-blend-mode'] = 'normal';
+        var layer_WindResourceAssessmentProjectDOE_1 = new L.geoJson(json_WindResourceAssessmentProjectDOE_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_WindResourceAssessmentProjectDOE_1',
+            layerName: 'layer_WindResourceAssessmentProjectDOE_1',
+            pane: 'pane_WindResourceAssessmentProjectDOE_1',
+            onEachFeature: pop_WindResourceAssessmentProjectDOE_1,
+            style: style_WindResourceAssessmentProjectDOE_1_0,
+        });
+        bounds_group.addLayer(layer_WindResourceAssessmentProjectDOE_1);
+        map.addLayer(layer_WindResourceAssessmentProjectDOE_1);
+        function pop_SlopeSuitabilityBurgosDasol1SPP_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="DN"colspan="2"><strong>DN</strong><br />' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="Area"colspan="2"><strong>Area</strong><br />' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SlopeSuitabilityBurgosDasol1SPP_2_0(feature) {
+            switch(String(feature.properties['DN'])) {
+                case '1':
+                    return {
+                pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '2':
+                    return {
+                pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,204,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '3':
+                    return {
+                pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,240,158,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '4':
+                    return {
+                pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,154,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '5':
+                    return {
+                pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SlopeSuitabilityBurgosDasol1SPP_2');
+        map.getPane('pane_SlopeSuitabilityBurgosDasol1SPP_2').style.zIndex = 402;
+        map.getPane('pane_SlopeSuitabilityBurgosDasol1SPP_2').style['mix-blend-mode'] = 'normal';
+        var layer_SlopeSuitabilityBurgosDasol1SPP_2 = new L.geoJson(json_SlopeSuitabilityBurgosDasol1SPP_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SlopeSuitabilityBurgosDasol1SPP_2',
+            layerName: 'layer_SlopeSuitabilityBurgosDasol1SPP_2',
+            pane: 'pane_SlopeSuitabilityBurgosDasol1SPP_2',
+            onEachFeature: pop_SlopeSuitabilityBurgosDasol1SPP_2,
+            style: style_SlopeSuitabilityBurgosDasol1SPP_2_0,
+        });
+        bounds_group.addLayer(layer_SlopeSuitabilityBurgosDasol1SPP_2);
+        map.addLayer(layer_SlopeSuitabilityBurgosDasol1SPP_2);
+        function pop_SlopeSuitabilityNorthPossibleExpansion_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="DN"colspan="2"><strong>DN</strong><br />' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="Area"colspan="2"><strong>Area</strong><br />' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SlopeSuitabilityNorthPossibleExpansion_3_0(feature) {
+            switch(String(feature.properties['DN'])) {
+                case '1':
+                    return {
+                pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '2':
+                    return {
+                pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,204,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '3':
+                    return {
+                pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,240,158,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '4':
+                    return {
+                pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,154,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '5':
+                    return {
+                pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SlopeSuitabilityNorthPossibleExpansion_3');
+        map.getPane('pane_SlopeSuitabilityNorthPossibleExpansion_3').style.zIndex = 403;
+        map.getPane('pane_SlopeSuitabilityNorthPossibleExpansion_3').style['mix-blend-mode'] = 'normal';
+        var layer_SlopeSuitabilityNorthPossibleExpansion_3 = new L.geoJson(json_SlopeSuitabilityNorthPossibleExpansion_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SlopeSuitabilityNorthPossibleExpansion_3',
+            layerName: 'layer_SlopeSuitabilityNorthPossibleExpansion_3',
+            pane: 'pane_SlopeSuitabilityNorthPossibleExpansion_3',
+            onEachFeature: pop_SlopeSuitabilityNorthPossibleExpansion_3,
+            style: style_SlopeSuitabilityNorthPossibleExpansion_3_0,
+        });
+        bounds_group.addLayer(layer_SlopeSuitabilityNorthPossibleExpansion_3);
+        map.addLayer(layer_SlopeSuitabilityNorthPossibleExpansion_3);
+        function pop_SlopeSuitabilityWestPossibleExpansion_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="DN"colspan="2"><strong>DN</strong><br />' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="Area"colspan="2"><strong>Area</strong><br />' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SlopeSuitabilityWestPossibleExpansion_4_0(feature) {
+            switch(String(feature.properties['DN'])) {
+                case '1':
+                    return {
+                pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '2':
+                    return {
+                pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,204,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '3':
+                    return {
+                pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,240,158,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '4':
+                    return {
+                pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,154,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '5':
+                    return {
+                pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SlopeSuitabilityWestPossibleExpansion_4');
+        map.getPane('pane_SlopeSuitabilityWestPossibleExpansion_4').style.zIndex = 404;
+        map.getPane('pane_SlopeSuitabilityWestPossibleExpansion_4').style['mix-blend-mode'] = 'normal';
+        var layer_SlopeSuitabilityWestPossibleExpansion_4 = new L.geoJson(json_SlopeSuitabilityWestPossibleExpansion_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SlopeSuitabilityWestPossibleExpansion_4',
+            layerName: 'layer_SlopeSuitabilityWestPossibleExpansion_4',
+            pane: 'pane_SlopeSuitabilityWestPossibleExpansion_4',
+            onEachFeature: pop_SlopeSuitabilityWestPossibleExpansion_4,
+            style: style_SlopeSuitabilityWestPossibleExpansion_4_0,
+        });
+        bounds_group.addLayer(layer_SlopeSuitabilityWestPossibleExpansion_4);
+        map.addLayer(layer_SlopeSuitabilityWestPossibleExpansion_4);
+        function pop_SlopeSuitabilityEastExpansionEndorsedbyAgent_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="DN"colspan="2"><strong>DN</strong><br />' + (feature.properties['DN'] !== null ? autolinker.link(feature.properties['DN'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="Area"colspan="2"><strong>Area</strong><br />' + (feature.properties['Area'] !== null ? autolinker.link(feature.properties['Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_SlopeSuitabilityEastExpansionEndorsedbyAgent_5_0(feature) {
+            switch(String(feature.properties['DN'])) {
+                case '1':
+                    return {
+                pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(26,150,65,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '2':
+                    return {
+                pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(138,204,98,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '3':
+                    return {
+                pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,240,158,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '4':
+                    return {
+                pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,223,154,1.0)',
+                interactive: true,
+            }
+                    break;
+                case '5':
+                    return {
+                pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,25,28,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5');
+        map.getPane('pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5').style.zIndex = 405;
+        map.getPane('pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5').style['mix-blend-mode'] = 'normal';
+        var layer_SlopeSuitabilityEastExpansionEndorsedbyAgent_5 = new L.geoJson(json_SlopeSuitabilityEastExpansionEndorsedbyAgent_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+            layerName: 'layer_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+            pane: 'pane_SlopeSuitabilityEastExpansionEndorsedbyAgent_5',
+            onEachFeature: pop_SlopeSuitabilityEastExpansionEndorsedbyAgent_5,
+            style: style_SlopeSuitabilityEastExpansionEndorsedbyAgent_5_0,
+        });
+        bounds_group.addLayer(layer_SlopeSuitabilityEastExpansionEndorsedbyAgent_5);
+        map.addLayer(layer_SlopeSuitabilityEastExpansionEndorsedbyAgent_5);
+        function pop_NorthPossibleExpansion_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_NorthPossibleExpansion_6_0() {
+            return {
+                pane: 'pane_NorthPossibleExpansion_6',
+                opacity: 1,
+                color: 'rgba(255,251,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,207,80,0.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_NorthPossibleExpansion_6');
+        map.getPane('pane_NorthPossibleExpansion_6').style.zIndex = 406;
+        map.getPane('pane_NorthPossibleExpansion_6').style['mix-blend-mode'] = 'normal';
+        var layer_NorthPossibleExpansion_6 = new L.geoJson(json_NorthPossibleExpansion_6, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_NorthPossibleExpansion_6',
+            layerName: 'layer_NorthPossibleExpansion_6',
+            pane: 'pane_NorthPossibleExpansion_6',
+            onEachFeature: pop_NorthPossibleExpansion_6,
+            style: style_NorthPossibleExpansion_6_0,
+        });
+        bounds_group.addLayer(layer_NorthPossibleExpansion_6);
+        map.addLayer(layer_NorthPossibleExpansion_6);
+        function pop_WestPossibleExpansion_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_WestPossibleExpansion_7_0() {
+            return {
+                pane: 'pane_WestPossibleExpansion_7',
+                opacity: 1,
+                color: 'rgba(255,251,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,207,80,0.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_WestPossibleExpansion_7');
+        map.getPane('pane_WestPossibleExpansion_7').style.zIndex = 407;
+        map.getPane('pane_WestPossibleExpansion_7').style['mix-blend-mode'] = 'normal';
+        var layer_WestPossibleExpansion_7 = new L.geoJson(json_WestPossibleExpansion_7, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_WestPossibleExpansion_7',
+            layerName: 'layer_WestPossibleExpansion_7',
+            pane: 'pane_WestPossibleExpansion_7',
+            onEachFeature: pop_WestPossibleExpansion_7,
+            style: style_WestPossibleExpansion_7_0,
+        });
+        bounds_group.addLayer(layer_WestPossibleExpansion_7);
+        map.addLayer(layer_WestPossibleExpansion_7);
+        function pop_EastPossibleExpansionEndorsedbyAgentkmz_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['description'] !== null ? autolinker.link(feature.properties['description'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['timestamp'] !== null ? autolinker.link(feature.properties['timestamp'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['begin'] !== null ? autolinker.link(feature.properties['begin'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['end'] !== null ? autolinker.link(feature.properties['end'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['altitudeMode'] !== null ? autolinker.link(feature.properties['altitudeMode'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['tessellate'] !== null ? autolinker.link(feature.properties['tessellate'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['extrude'] !== null ? autolinker.link(feature.properties['extrude'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['visibility'] !== null ? autolinker.link(feature.properties['visibility'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['drawOrder'] !== null ? autolinker.link(feature.properties['drawOrder'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['icon'] !== null ? autolinker.link(feature.properties['icon'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_EastPossibleExpansionEndorsedbyAgentkmz_8_0() {
+            return {
+                pane: 'pane_EastPossibleExpansionEndorsedbyAgentkmz_8',
+                opacity: 1,
+                color: 'rgba(255,251,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,207,80,0.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_EastPossibleExpansionEndorsedbyAgentkmz_8');
+        map.getPane('pane_EastPossibleExpansionEndorsedbyAgentkmz_8').style.zIndex = 408;
+        map.getPane('pane_EastPossibleExpansionEndorsedbyAgentkmz_8').style['mix-blend-mode'] = 'normal';
+        var layer_EastPossibleExpansionEndorsedbyAgentkmz_8 = new L.geoJson(json_EastPossibleExpansionEndorsedbyAgentkmz_8, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_EastPossibleExpansionEndorsedbyAgentkmz_8',
+            layerName: 'layer_EastPossibleExpansionEndorsedbyAgentkmz_8',
+            pane: 'pane_EastPossibleExpansionEndorsedbyAgentkmz_8',
+            onEachFeature: pop_EastPossibleExpansionEndorsedbyAgentkmz_8,
+            style: style_EastPossibleExpansionEndorsedbyAgentkmz_8_0,
+        });
+        bounds_group.addLayer(layer_EastPossibleExpansionEndorsedbyAgentkmz_8);
+        map.addLayer(layer_EastPossibleExpansionEndorsedbyAgentkmz_8);
+        function pop_BurgosDasol1SPPLotStatus_9(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="LOT NUMBER"colspan="2"><strong>LOT NUMBER</strong><br />' + (feature.properties['LOT NUMBER'] !== null ? autolinker.link(feature.properties['LOT NUMBER'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="TD/TITLE N"colspan="2"><strong>TD/TITLE N</strong><br />' + (feature.properties['TD/TITLE N'] !== null ? autolinker.link(feature.properties['TD/TITLE N'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="REGISTERED"colspan="2"><strong>REGISTERED</strong><br />' + (feature.properties['REGISTERED'] !== null ? autolinker.link(feature.properties['REGISTERED'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="LOCATION"colspan="2"><strong>LOCATION</strong><br />' + (feature.properties['LOCATION'] !== null ? autolinker.link(feature.properties['LOCATION'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="AREA (SQM)"colspan="2"><strong>AREA (SQM)</strong><br />' + (feature.properties['AREA (SQM)'] !== null ? autolinker.link(feature.properties['AREA (SQM)'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="TCT COPY"colspan="2"><strong>TCT COPY</strong><br />' + (feature.properties['TCT COPY'] !== null ? autolinker.link(feature.properties['TCT COPY'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="SURVEY PLA"colspan="2"><strong>SURVEY PLA</strong><br />' + (feature.properties['SURVEY PLA'] !== null ? autolinker.link(feature.properties['SURVEY PLA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="SPA"colspan="2"><strong>SPA</strong><br />' + (feature.properties['SPA'] !== null ? autolinker.link(feature.properties['SPA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="NIA CERT"colspan="2"><strong>NIA CERT</strong><br />' + (feature.properties['NIA CERT'] !== null ? autolinker.link(feature.properties['NIA CERT'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="NONTENANCY"colspan="2"><strong>NONTENANCY</strong><br />' + (feature.properties['NONTENANCY'] !== null ? autolinker.link(feature.properties['NONTENANCY'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="NON IRRI"colspan="2"><strong>NON IRRI</strong><br />' + (feature.properties['NON IRRI'] !== null ? autolinker.link(feature.properties['NON IRRI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="REMARKS"colspan="2"><strong>REMARKS</strong><br />' + (feature.properties['REMARKS'] !== null ? autolinker.link(feature.properties['REMARKS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td class="visible-with-data" id="EXCEL"colspan="2"><strong>EXCEL</strong><br />' + (feature.properties['EXCEL'] !== null ? autolinker.link(feature.properties['EXCEL'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_BurgosDasol1SPPLotStatus_9_0() {
+            return {
+                pane: 'pane_BurgosDasol1SPPLotStatus_9',
+                opacity: 1,
+                color: 'rgba(255,251,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 3.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(190,207,80,0.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_BurgosDasol1SPPLotStatus_9');
+        map.getPane('pane_BurgosDasol1SPPLotStatus_9').style.zIndex = 409;
+        map.getPane('pane_BurgosDasol1SPPLotStatus_9').style['mix-blend-mode'] = 'normal';
+        var layer_BurgosDasol1SPPLotStatus_9 = new L.geoJson(json_BurgosDasol1SPPLotStatus_9, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_BurgosDasol1SPPLotStatus_9',
+            layerName: 'layer_BurgosDasol1SPPLotStatus_9',
+            pane: 'pane_BurgosDasol1SPPLotStatus_9',
+            onEachFeature: pop_BurgosDasol1SPPLotStatus_9,
+            style: style_BurgosDasol1SPPLotStatus_9_0,
+        });
+        bounds_group.addLayer(layer_BurgosDasol1SPPLotStatus_9);
+        map.addLayer(layer_BurgosDasol1SPPLotStatus_9);
+        function pop_AD_Pangasinan_10(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROVINCE'] !== null ? autolinker.link(feature.properties['PROVINCE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MUNICIPALI'] !== null ? autolinker.link(feature.properties['MUNICIPALI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CLASSIFICA'] !== null ? autolinker.link(feature.properties['CLASSIFICA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MAP_NO_'] !== null ? autolinker.link(feature.properties['MAP_NO_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROJECT_NO'] !== null ? autolinker.link(feature.properties['PROJECT_NO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['BLOCK_NO_'] !== null ? autolinker.link(feature.properties['BLOCK_NO_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['AREA_ON_MA'] !== null ? autolinker.link(feature.properties['AREA_ON_MA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARKS'] !== null ? autolinker.link(feature.properties['REMARKS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['HECTARES'] !== null ? autolinker.link(feature.properties['HECTARES'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['STATUS_ID'] !== null ? autolinker.link(feature.properties['STATUS_ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCMAP_DATE'] !== null ? autolinker.link(feature.properties['LCMAP_DATE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(feature.properties['Shape_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(feature.properties['Shape_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_AD_Pangasinan_10_0() {
+            return {
+                pane: 'pane_AD_Pangasinan_10',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(254,0,169,0.30196078431372547)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_AD_Pangasinan_10');
+        map.getPane('pane_AD_Pangasinan_10').style.zIndex = 410;
+        map.getPane('pane_AD_Pangasinan_10').style['mix-blend-mode'] = 'normal';
+        var layer_AD_Pangasinan_10 = new L.geoJson(json_AD_Pangasinan_10, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_AD_Pangasinan_10',
+            layerName: 'layer_AD_Pangasinan_10',
+            pane: 'pane_AD_Pangasinan_10',
+            onEachFeature: pop_AD_Pangasinan_10,
+            style: style_AD_Pangasinan_10_0,
+        });
+        bounds_group.addLayer(layer_AD_Pangasinan_10);
+        map.addLayer(layer_AD_Pangasinan_10);
+        function pop_FL_Pangasinan_11(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(feature.properties['OBJECTID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['ID'] !== null ? autolinker.link(feature.properties['ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROVINCE'] !== null ? autolinker.link(feature.properties['PROVINCE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MUNICIPALI'] !== null ? autolinker.link(feature.properties['MUNICIPALI'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['CLASSIFICA'] !== null ? autolinker.link(feature.properties['CLASSIFICA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['MAP_NO_'] !== null ? autolinker.link(feature.properties['MAP_NO_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['PROJECT_NO'] !== null ? autolinker.link(feature.properties['PROJECT_NO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['BLOCK_NO_'] !== null ? autolinker.link(feature.properties['BLOCK_NO_'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['AREA_ON_MA'] !== null ? autolinker.link(feature.properties['AREA_ON_MA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARKS'] !== null ? autolinker.link(feature.properties['REMARKS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['HECTARES'] !== null ? autolinker.link(feature.properties['HECTARES'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['STATUS_ID'] !== null ? autolinker.link(feature.properties['STATUS_ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCMAP_DATE'] !== null ? autolinker.link(feature.properties['LCMAP_DATE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(feature.properties['Shape_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Shape_Area'] !== null ? autolinker.link(feature.properties['Shape_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FL_Pangasinan_11_0() {
+            return {
+                pane: 'pane_FL_Pangasinan_11',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(13,145,6,0.2823529411764706)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_FL_Pangasinan_11');
+        map.getPane('pane_FL_Pangasinan_11').style.zIndex = 411;
+        map.getPane('pane_FL_Pangasinan_11').style['mix-blend-mode'] = 'normal';
+        var layer_FL_Pangasinan_11 = new L.geoJson(json_FL_Pangasinan_11, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_FL_Pangasinan_11',
+            layerName: 'layer_FL_Pangasinan_11',
+            pane: 'pane_FL_Pangasinan_11',
+            onEachFeature: pop_FL_Pangasinan_11,
+            style: style_FL_Pangasinan_11_0,
+        });
+        bounds_group.addLayer(layer_FL_Pangasinan_11);
+        map.addLayer(layer_FL_Pangasinan_11);
+        var baseMaps = {};
+        var overlaysTree = [
+        {label: '<b>Land Class</b>', selectAllCheckbox: true, children: [
+            {label: '<img src="legend/FL_Pangasinan_11.png" /> FL_Pangasinan', layer: layer_FL_Pangasinan_11},
+            {label: '<img src="legend/AD_Pangasinan_10.png" /> A&D_Pangasinan', layer: layer_AD_Pangasinan_10},]},
+        {label: '<b>Lot ID</b>', selectAllCheckbox: true, children: [
+            {label: '<img src="legend/BurgosDasol1SPPLotStatus_9.png" /> Burgos-Dasol 1 SPP Lot Status', layer: layer_BurgosDasol1SPPLotStatus_9},
+            {label: '<img src="legend/EastPossibleExpansionEndorsedbyAgentkmz_8.png" /> East Possible Expansion (Endorsed by Agent).kmz', layer: layer_EastPossibleExpansionEndorsedbyAgentkmz_8},
+            {label: '<img src="legend/WestPossibleExpansion_7.png" /> West Possible Expansion', layer: layer_WestPossibleExpansion_7},
+            {label: '<img src="legend/NorthPossibleExpansion_6.png" /> North Possible Expansion', layer: layer_NorthPossibleExpansion_6},]},
+        {label: '<b>Slope Analysis</b>', selectAllCheckbox: true, children: [
+            {label: 'Slope Suitability (East Expansion Endorsed by Agent)<br /><table><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityEastExpansionEndorsedbyAgent_5_05degrees0.png" /></td><td>0-5 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityEastExpansionEndorsedbyAgent_5_510degrees1.png" /></td><td>5-10 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityEastExpansionEndorsedbyAgent_5_1012degrees2.png" /></td><td>10-12 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityEastExpansionEndorsedbyAgent_5_1215degrees3.png" /></td><td>12-15 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityEastExpansionEndorsedbyAgent_5_15degreesabove4.png" /></td><td>15 degrees above</td></tr></table>', layer: layer_SlopeSuitabilityEastExpansionEndorsedbyAgent_5},
+            {label: 'Slope Suitability (West Possible Expansion)<br /><table><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityWestPossibleExpansion_4_05degrees0.png" /></td><td>0-5 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityWestPossibleExpansion_4_510degrees1.png" /></td><td>5-10 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityWestPossibleExpansion_4_1012degrees2.png" /></td><td>10-12 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityWestPossibleExpansion_4_1215degrees3.png" /></td><td>12-15 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityWestPossibleExpansion_4_15degreesabove4.png" /></td><td>15 degrees above</td></tr></table>', layer: layer_SlopeSuitabilityWestPossibleExpansion_4},
+            {label: 'Slope Suitability (North Possible Expansion)<br /><table><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityNorthPossibleExpansion_3_05degrees0.png" /></td><td>0-5 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityNorthPossibleExpansion_3_510degrees1.png" /></td><td>5-10 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityNorthPossibleExpansion_3_1012degrees2.png" /></td><td>10-12 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityNorthPossibleExpansion_3_1215degrees3.png" /></td><td>12-15 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityNorthPossibleExpansion_3_15degreesabove4.png" /></td><td>15 degrees above</td></tr></table>', layer: layer_SlopeSuitabilityNorthPossibleExpansion_3},
+            {label: 'Slope Suitability (Burgos-Dasol 1 SPP)<br /><table><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityBurgosDasol1SPP_2_05degrees0.png" /></td><td>0-5 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityBurgosDasol1SPP_2_510degrees1.png" /></td><td>5-10 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityBurgosDasol1SPP_2_1012degrees2.png" /></td><td>10-12 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityBurgosDasol1SPP_2_1215degrees3.png" /></td><td>12-15 degrees</td></tr><tr><td style="text-align: center;"><img src="legend/SlopeSuitabilityBurgosDasol1SPP_2_15degreesabove4.png" /></td><td>15 degrees above</td></tr></table>', layer: layer_SlopeSuitabilityBurgosDasol1SPP_2},]},
+            {label: '<img src="legend/WindResourceAssessmentProjectDOE_1.png" /> Wind Resource Assessment Project - DOE', layer: layer_WindResourceAssessmentProjectDOE_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: false, 
+        });
+        lay.addTo(map);
+		document.addEventListener("DOMContentLoaded", function() {
+            // set new Layers List height which considers toggle icon
+            function newLayersListHeight() {
+                var layerScrollbarElement = document.querySelector('.leaflet-control-layers-scrollbar');
+                if (layerScrollbarElement) {
+                    var layersListElement = document.querySelector('.leaflet-control-layers-list');
+                    var originalHeight = layersListElement.style.height 
+                        || window.getComputedStyle(layersListElement).height;
+                    var newHeight = parseFloat(originalHeight) - 50;
+                    layersListElement.style.height = newHeight + 'px';
+                }
+            }
+            var isLayersListExpanded = true;
+            var controlLayersElement = document.querySelector('.leaflet-control-layers');
+            var toggleLayerControl = document.querySelector('.leaflet-control-layers-toggle');
+            // toggle Collapsed/Expanded and apply new Layers List height
+            toggleLayerControl.addEventListener('click', function() {
+                if (isLayersListExpanded) {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                } else {
+                    controlLayersElement.classList.add('leaflet-control-layers-expanded');
+                }
+                isLayersListExpanded = !isLayersListExpanded;
+                newLayersListHeight()
+            });	
+			// apply new Layers List height if toggle layerstree
+			if (controlLayersElement) {
+				controlLayersElement.addEventListener('click', function(event) {
+					var toggleLayerHeaderPointer = event.target.closest('.leaflet-layerstree-header-pointer span');
+					if (toggleLayerHeaderPointer) {
+						newLayersListHeight();
+					}
+				});
+			}
+            // Collapsed/Expanded at Start to apply new height
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            setTimeout(function() {
+                toggleLayerControl.click();
+            }, 10);
+            // Collapsed touch/small screen
+            var isSmallScreen = window.innerWidth < 650;
+            if (isSmallScreen) {
+                setTimeout(function() {
+                    controlLayersElement.classList.remove('leaflet-control-layers-expanded');
+                    isLayersListExpanded = !isLayersListExpanded;
+                }, 500);
+            }  
+        });       
+        setBounds();
+        </script>
+    </body>
+</html>
